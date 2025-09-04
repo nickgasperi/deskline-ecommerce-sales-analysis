@@ -1,10 +1,12 @@
 									-- SALES --
--- orders, sales, and sales/order by year --
+-- orders, sales, and profit stats by year --
 SELECT
 	order_year,
     COUNT(*) AS num_orders,
     SUM(sales_usd) AS sales_dollars,
-    SUM(sales_usd) / COUNT(*) AS avg_sales_per_order
+    SUM(sales_usd) / COUNT(*) AS avg_order_sales,
+    SUM(profit_usd) AS total_profit,
+    AVG(profit_usd) AS avg_order_profit
 FROM orders
 GROUP BY order_year
 ORDER BY order_year ASC
@@ -38,7 +40,7 @@ GROUP BY customer_segment
 ORDER BY total_sales DESC
 ;
 
--- discounts --
+-- frequency, total, and avg value of discounts --
 SELECT
 	COUNT(*) AS num_orders,
     COUNT(*) / (
@@ -46,6 +48,7 @@ SELECT
                 FROM orders
                 ) AS pct_of_tot,
 	AVG(discount_usd) AS avg_discount,
+    SUM(discount_usd) AS tot_discount_value,
     AVG((
 		SELECT AVG(sales_usd)
         FROM orders
@@ -54,6 +57,31 @@ FROM orders
 WHERE discount_usd > 0
 ;
 
+-- count, sum, avg, and pct of tot sales discounts in 2024 --
+SELECT
+    COUNT(*) AS num_discounts,
+    AVG(discount_usd) AS avg_discount,
+    SUM(discount_usd) AS total_discount_value,
+    SUM(discount_usd) / (
+						 SELECT
+                         SUM(sales_usd)
+                         FROM orders
+                         WHERE order_year = 2024
+                         ) AS pct_of_tot_sales
+FROM orders
+WHERE order_year = 2024
+	AND discount_usd > 0
+;
+
+-- sales, profit, discount by year --
+SELECT
+	SUM(sales_usd) AS total_sales,
+    SUM(profit_usd) AS total_profit,
+    SUM(discount_usd) AS total_discounts,
+    SUM(profit_usd) / SUM(sales_usd) AS profit_pct,
+    SUM(discount_usd) / SUM(sales_usd) AS discount_pct
+FROM orders
+;
 									-- PRODUCTS/CATEGORY --
 -- number of products and product categories --
 SELECT
@@ -134,6 +162,23 @@ ORDER BY total_sales DESC
 LIMIT 10
 ;
 
+-- leading categories in California --
+SELECT
+	p.product_category,
+    SUM(o.sales_usd) AS total_sales,
+    SUM(o.sales_usd) / (
+						SELECT SUM(sales_usd)
+                        FROM orders
+                        WHERE customer_state = 'California'
+                        ) AS pct_of_total
+FROM orders o
+JOIN products p
+	ON o.product_id = p.product_id
+WHERE o.customer_state = 'California'
+GROUP BY p.product_category
+;
+
+-- leading products in California --
 -- most and least profitable states --
 -- switch sorting in ORDER BY clause to find most and least --
 SELECT
