@@ -3,9 +3,9 @@
 ## **Project Background**
 Deskline is a U.S.-based e-commerce company that sells office equipment, furniture, and electronics. After two years in business, the company has collected substantial data pertaining to its sales, products, and customers. However, they are unsure of how to effectively store this information, or how to translate it into actionable insights. This project establishes a new relational database schema to support data organization and scalability, and analyzes that data to generate insights and provide recommendations for improving sales and operational performance. 
 
-- To download an interactive Power BI dashboard, click [*here*]()
-- To view the data cleaning process in Excel and SQL, click [*here*]()
-- To view the SQL queries utilized to perform exploratory data analysis, click [*here*]()
+- To download an interactive Power BI dashboard, click [*here*](https://github.com/nickgasperi/deskline-ecommerce-sales-analysis/raw/main/powerbi/ecommerce-sales-dashboard.pbix).
+- To view the data cleaning process in Excel and SQL, click [*here*](https://github.com/nickgasperi/deskline-ecommerce-sales-analysis/tree/main/code).
+- To view the SQL queries utilized to perform exploratory data analysis, click [*here*](https://github.com/nickgasperi/deskline-ecommerce-sales-analysis/blob/main/code/ecommerce-exploratory-analysis.sql).
 
 ## **Objectives**
 1. Transform the current data source into a structured relational database schema.
@@ -23,7 +23,7 @@ The original dataset consisted of a single CSV file containing 21 columns and 11
 Certain customer-related variables (e.g., *customer_segment*, *customer_region*) are stored in the **orders** table, as these details may vary between orders from the same customer.
 
 ## **Executive Summary**
-Deskline generated $11,631,365 in sales in 2023, and $11,534,726 in 2024, yielding a **<1% decrease in revenue** year-over-year. **Total profit increased** from $1,278,120 to $1,335,451 (+4.5%) over the same time frame. Revenue and profit remained stable, despite a **14% decrease in orders** in 2024, due to the average order price increasing from $191 to $220 (+15%). **Office Supplies was the best-selling product category**, accounting for 60% of total sales. Discounts were applied to over 94% of orders, averaging 11% of the average order value. **Total discounts represented 10% of revenue**, compared to an overall profit margin of only 11%.
+Deskline generated $11,631,365 in sales in 2023, and $11,534,726 in 2024, yielding a **<1% decrease in revenue** year-over-year. **Total profit increased** from $1,278,120 to $1,335,451 (+4.5%) over the same time frame. Revenue and profit remained stable, despite a **14% decrease in orders** in 2024, due to the average order value increasing from $191 to $220 (+15%). **Office Supplies was the best-selling product category**, accounting for 60% of total sales. Discounts were applied to over 94% of orders, averaging 11% of the average order value. **Total discounts represented 10% of revenue**, compared to an overall profit margin of only 11%.
 
 California placed more orders and generated more revenue than any other state. All product categories and geographical regions yielded approximately **$23 of profit per order**. The average delivery time was 3.5 days, while the average order was promised in 2.9 days, producing an **unfavorable shipping variance of 21%** (~0.5 days). Deskline can improve sales and operational performance by prioritizing Office Supplies inventory management, reducing the frequency and value of discounts, and providing more accurate delivery time estimates.
 
@@ -34,7 +34,7 @@ California placed more orders and generated more revenue than any other state. A
 ## **Key Insights**
 ### **Sales Trends**
 * Total orders decreased by 14% from 2023–2024. However, sales revenue declined by <1%, while total profit increased by 4.5%.
-* Sales and profit stability, despite fewer orders, was driven by the average sales price per order increasing from $191 to $220.
+* Sales and profit stability, despite fewer orders, was driven by the average order value increasing from $191 to $220.
 * The Consumer segment accounted for 52% of total sales, followed by Corporate (30%) and Home Office (18%).
 * Discounts were applied to over 94% of orders, averaging about $24 per order (11% of average order value). Deskline awarded $2,395,573 in total discounts across the two-year span.
 
@@ -55,7 +55,7 @@ California placed more orders and generated more revenue than any other state. A
 * Deskline generated the most sales in the West region, totaling $7,420,991, or 32% of total revenue.
 * The East region generated the second-highest sales (29%), followed by Central (23%) and South (16%).
 * California led all states with 20% of total sales. The next-best performing state was New York, accounting for 11% of total sales.
-* There was no discernable difference in profit between any of the regions, all about $23.
+* Profit per order was consistent across regions, averaging about $23.
 
 <p align = "center">
   <img src = "images/ecommerce-sales-by-region.png">
