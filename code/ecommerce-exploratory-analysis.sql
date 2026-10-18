@@ -1,23 +1,23 @@
-									-- SALES --
--- orders, sales, and profit stats by year --
+									-- SALES TRENDS --
+-- summarizing order counts, sales dollars, and profit by year --
 SELECT
 	order_year,
     COUNT(*) AS num_orders,
-    SUM(sales_usd) AS sales_dollars,
-    SUM(sales_usd) / COUNT(*) AS avg_order_sales,
-    SUM(profit_usd) AS total_profit,
-    AVG(profit_usd) AS avg_order_profit
+    SUM(sales_usd) AS total_sales_usd,
+    ROUND(SUM(sales_usd) / COUNT(*), 2) AS sales_per_order_usd,
+    SUM(profit_usd) AS total_profit_usd,
+    ROUND(AVG(profit_usd), 2) AS avg_profit_per_order_usd
 FROM orders
 GROUP BY order_year
 ORDER BY order_year ASC
 ;
 
--- orders and sales by month --
+-- number of orders and sales dollars by month --
 SELECT
 	order_year,
 	order_month,
     COUNT(*) AS num_orders,
-    SUM(sales_usd) AS total_sales
+    ROUND(SUM(sales_usd), 0) AS total_sales_usd
 FROM orders
 GROUP BY
 	order_year,
@@ -27,63 +27,66 @@ ORDER BY
     month_id ASC
 ;
 
--- sales by customer_segment --
+-- total sales dollars by customer segment --
 SELECT
 	customer_segment,
-	SUM(sales_usd) AS total_sales,
-    SUM(sales_usd) / (
+	ROUND(SUM(sales_usd), 0) AS total_sales_usd,
+    ROUND(SUM(sales_usd) / (
 							SELECT SUM(sales_usd)
-                            FROM orders
-                            ) AS pct_of_total
+							FROM orders
+							), 2) AS pct_of_total
 FROM orders
 GROUP BY customer_segment
-ORDER BY total_sales DESC
+ORDER BY SUM(sales_usd) DESC
 ;
 
--- frequency, total, and avg value of discounts --
+-- summarizing customer discounts  --
 SELECT
 	COUNT(*) AS num_orders,
-    COUNT(*) / (
-				SELECT COUNT(*)
-                FROM orders
-                ) AS pct_of_tot,
-	AVG(discount_usd) AS avg_discount,
-    SUM(discount_usd) AS tot_discount_value,
-    AVG((
+    ROUND(COUNT(*) / (
+					  SELECT COUNT(*)
+					  FROM orders
+					  ), 2) AS pct_of_tot_orders,
+	ROUND(AVG(discount_usd), 2) AS avg_discount_usd,
+    ROUND(SUM(discount_usd), 2) AS tot_discount_usd,
+    ROUND(AVG((
 		SELECT AVG(sales_usd)
         FROM orders
-        )) as avg_sale_price
+        )), 2) AS avg_sale_price_usd
 FROM orders
 WHERE discount_usd > 0
 ;
 
--- count, sum, avg, and pct of tot sales discounts in 2024 --
+-- digging deeper into discounts applied in 2024 --
 SELECT
     COUNT(*) AS num_discounts,
-    AVG(discount_usd) AS avg_discount,
-    SUM(discount_usd) AS total_discount_value,
-    SUM(discount_usd) / (
-						 SELECT
-                         SUM(sales_usd)
-                         FROM orders
-                         WHERE order_year = 2024
-                         ) AS pct_of_tot_sales
+    ROUND(AVG(discount_usd), 2) AS avg_discount_usd,
+    ROUND(SUM(discount_usd), 2) AS total_discount_usd,
+    ROUND(SUM(discount_usd) / (
+							   SELECT
+							   SUM(sales_usd)
+							   FROM orders
+							   WHERE order_year = 2024
+							   ), 2) AS pct_of_tot_sales_usd
 FROM orders
 WHERE order_year = 2024
 	AND discount_usd > 0
 ;
 
--- sales, profit, discount by year --
+-- comparing sales dollars , profit, and discounts by year --
 SELECT
-	SUM(sales_usd) AS total_sales,
-    SUM(profit_usd) AS total_profit,
-    SUM(discount_usd) AS total_discounts,
-    SUM(profit_usd) / SUM(sales_usd) AS profit_pct,
-    SUM(discount_usd) / SUM(sales_usd) AS discount_pct
+	order_year,
+    ROUND(SUM(sales_usd), 0) AS total_sales_usd,
+    ROUND(SUM(profit_usd), 0) AS total_profit_usd,
+    ROUND(SUM(discount_usd), 0) AS total_discounts_usd,
+    ROUND(SUM(profit_usd) / SUM(sales_usd), 2) AS profit_pct_usd,
+    ROUND(SUM(discount_usd) / SUM(sales_usd), 2) AS discount_pct_usd
 FROM orders
+GROUP BY order_year
+ORDER BY order_year ASC
 ;
-									-- PRODUCTS/CATEGORY --
--- number of products and product categories --
+									-- PRODUCT & CATEGORY PERFORMANCE --
+-- number of unique products and product categories --
 SELECT
 	COUNT(DISTINCT product_id) AS num_products,
     COUNT(DISTINCT product_category) AS num_product_cat
@@ -92,26 +95,27 @@ FROM products
 
 -- best selling product category --
 SELECT
+	product_category,
     COUNT(o.sales_usd) AS num_orders,
-    SUM(o.sales_usd) AS total_sales,
-	AVG(o.sales_usd) AS avg_sales,
-    p.product_category
+    ROUND(SUM(o.sales_usd), 0) AS total_sales_usd,
+	ROUND(AVG(o.sales_usd), 0) AS avg_sales_usd
 FROM orders o
 JOIN products p
 	ON o.product_id = p.product_id
 GROUP BY p.product_category
-ORDER BY num_orders DESC
+ORDER BY COUNT(o.sales_usd) DESC
+LIMIT 1
 ;
 
 -- pct of total sales and avg profit by product category --
 SELECT
 	p.product_category,
-	SUM(o.sales_usd) AS total_sales,
-    SUM(o.sales_usd) / (
-								SELECT SUM(sales_usd)
-                                FROM orders
-							  ) AS pct_of_total,
-    AVG(o.profit_usd) AS avg_profit
+	ROUND(SUM(o.sales_usd), 0) AS total_sales_usd,
+    ROUND(SUM(o.sales_usd) / (
+							  SELECT SUM(sales_usd)
+							  FROM orders
+							  ), 2) AS pct_of_total_sales_usd,
+    ROUND(AVG(o.profit_usd), 0) AS avg_profit_usd
 FROM orders o
 JOIN products p
 	ON o.product_id = p.product_id
@@ -123,54 +127,55 @@ SELECT
 	p.product_id,
     p.product_category,
     p.product_name,
-    SUM(o.sales_usd) AS total_sales,
-    AVG(o.profit_usd) AS avg_profit
+    SUM(o.sales_usd) AS total_sales_usd,
+    ROUND(AVG(o.profit_usd), 2) AS avg_profit_usd
 FROM products p
 JOIN orders o
 	ON p.product_id = o.product_id
 GROUP BY product_id
-ORDER BY total_sales DESC
+ORDER BY SUM(o.sales_usd) DESC
 LIMIT 10
 ;
 
-									-- REGION --
+									-- REGIONAL SALES PERFORMANCE --
 -- sales and profit by region --
 SELECT
 	customer_region,
-    SUM(sales_usd) AS total_sales,
-    SUM(sales_usd) / (
+    ROUND(SUM(sales_usd), 2) AS total_sales_usd,
+    ROUND(SUM(sales_usd) / (
 							SELECT SUM(sales_usd)
-                            FROM orders
-                            ) AS pct_of_total,
-	AVG(profit_usd) AS avg_profit
+							FROM orders
+							), 2) AS pct_of_total,
+	ROUND(AVG(profit_usd), 2) AS avg_profit
 FROM orders
 GROUP BY customer_region
-ORDER BY total_sales DESC
+ORDER BY SUM(sales_usd) DESC
 ;
 
--- sales by state --
+-- top 10 states by total sales dollars --
 SELECT
 	customer_state,
-    SUM(sales_usd) AS total_sales,
-    SUM(sales_usd) / (
+    ROUND(SUM(sales_usd), 0) AS total_sales_usd,
+    ROUND(SUM(sales_usd) / (
 							SELECT SUM(sales_usd)
-                            FROM orders
-							) AS pct_of_total
+							FROM orders
+							), 2) AS pct_of_total
 FROM orders
 GROUP BY customer_state
-ORDER BY total_sales DESC
+ORDER BY SUM(sales_usd) DESC
 LIMIT 10
 ;
 
--- leading categories in California --
+-- leading categories in top selling state (California) --
 SELECT
-	p.product_category,
-    SUM(o.sales_usd) AS total_sales,
-    SUM(o.sales_usd) / (
-						SELECT SUM(sales_usd)
-                        FROM orders
-                        WHERE customer_state = 'California'
-                        ) AS pct_of_total
+	customer_state,
+    p.product_category,
+    ROUND(SUM(o.sales_usd), 0) AS total_sales_usd,
+    ROUND(SUM(o.sales_usd) / (
+							  SELECT SUM(sales_usd)
+							  FROM orders
+							  WHERE customer_state = 'California'
+							  ), 2) AS pct_of_total_usd
 FROM orders o
 JOIN products p
 	ON o.product_id = p.product_id
@@ -178,53 +183,77 @@ WHERE o.customer_state = 'California'
 GROUP BY p.product_category
 ;
 
--- leading products in California --
--- most and least profitable states --
--- switch sorting in ORDER BY clause to find most and least --
+-- eight least profitable states in terms of avg profit per order --
 SELECT
 	customer_state,
-    AVG(profit_usd) AS avg_profit
+    ROUND(AVG(profit_usd), 2) AS avg_profit
 FROM orders
 GROUP BY customer_state
 ORDER BY avg_profit ASC
+LIMIT 8
 ;
 
-									-- SHIPPING --
--- delivery classifications --
+-- eight most profitable states in terms of avg profit per order --
 SELECT
-	delivery_status,
-    COUNT(*) AS num_orders,
-    COUNT(*) / (
-				SELECT COUNT(*)
-                FROM orders
-                ) AS pct_of_total
+	customer_state,
+    ROUND(AVG(profit_usd), 2) AS avg_profit
 FROM orders
-GROUP BY delivery_status
-ORDER BY pct_of_total DESC
+GROUP BY customer_state
+ORDER BY avg_profit DESC
+LIMIT 8
 ;
 
--- scheduled vs actual shipping time --
+									-- SHIPPING TIMELINESS --
+-- summarize delivery outcomes by delivery result --
 SELECT
-	AVG(est_ship_days) AS sch_days,
-    AVG(actual_ship_days) AS act_days
+	delivery_result,
+    COUNT(*) AS num_orders,
+    ROUND(COUNT(*) / (
+					  SELECT COUNT(*)
+					  FROM orders
+					  ), 2) AS pct_of_total_orders
+FROM orders
+GROUP BY delivery_result
+ORDER BY delivery_result ASC
+;
+
+-- average scheduled vs average actual shipping time --
+SELECT
+	ROUND(AVG(est_ship_days), 1) AS sch_days,
+    ROUND(AVG(actual_ship_days), 1) AS act_days
 FROM orders
 ;
 
 -- shipping variance by region --
 SELECT
 	customer_region,
-    AVG(est_ship_days)-AVG(actual_ship_days) AS avg_time_diff
+    ROUND(AVG(est_ship_days), 2) AS sch_days,
+    ROUND(AVG(actual_ship_days), 2) AS act_days,
+    ROUND(AVG(est_ship_days)-AVG(actual_ship_days), 2) AS avg_ship_days_var
 FROM orders
 GROUP BY customer_region
-ORDER BY avg_time_diff DESC
+ORDER BY avg_ship_days_var DESC
 ;
 
--- shipping variance by state --
+-- six least favorable shipping variances by state --
 SELECT
 	customer_state,
-    AVG(est_ship_days)-AVG(actual_ship_days) AS avg_time_diff
+    ROUND(AVG(est_ship_days), 2) AS sch_days,
+    ROUND(AVG(actual_ship_days), 2) AS act_days,
+    AVG(est_ship_days)-AVG(actual_ship_days) AS avg_ship_days_var
 FROM orders
 GROUP BY customer_state
-ORDER BY avg_time_diff ASC
-LIMIT 5
+ORDER BY avg_ship_days_var ASC
+LIMIT 6
 ;
+
+-- six most favorable shipping variances by state --
+SELECT
+	customer_state,
+    ROUND(AVG(est_ship_days), 2) AS sch_days,
+    ROUND(AVG(actual_ship_days), 2) AS act_days,
+    AVG(est_ship_days)-AVG(actual_ship_days) AS avg_ship_days_var
+FROM orders
+GROUP BY customer_state
+ORDER BY avg_ship_days_var DESC
+LIMIT 6

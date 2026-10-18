@@ -1,5 +1,5 @@
--- this project's data cleaning and prep was performed in Excel --
--- but after loading the data into the DBMS, I realized I forgot to add a numeric month column --
+-- This project's data cleaning and prep was performed in Excel (ecommerce-data-cleaning-excel.md) --
+-- During this process, I forgot to add a column to indicate the order month with a numeric value. This column is added below. --
 
 -- create column --
 ALTER TABLE orders
