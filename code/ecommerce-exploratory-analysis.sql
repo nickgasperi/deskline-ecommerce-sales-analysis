@@ -50,9 +50,9 @@ SELECT
 	ROUND(AVG(discount_usd), 2) AS avg_discount_usd,
     ROUND(SUM(discount_usd), 2) AS tot_discount_usd,
     ROUND(AVG((
-		SELECT AVG(sales_usd)
-        FROM orders
-        )), 2) AS avg_sale_price_usd
+			   SELECT AVG(sales_usd)
+			   FROM orders
+			   )), 2) AS avg_sale_price_usd
 FROM orders
 WHERE discount_usd > 0
 ;
@@ -69,8 +69,9 @@ SELECT
 							   WHERE order_year = 2024
 							   ), 2) AS pct_of_tot_sales_usd
 FROM orders
-WHERE order_year = 2024
-	AND discount_usd > 0
+WHERE
+	order_year = 2024 AND
+    discount_usd > 0
 ;
 
 -- comparing sales dollars , profit, and discounts by year --
@@ -229,7 +230,7 @@ SELECT
 	customer_region,
     ROUND(AVG(est_ship_days), 2) AS sch_days,
     ROUND(AVG(actual_ship_days), 2) AS act_days,
-    ROUND(AVG(est_ship_days)-AVG(actual_ship_days), 2) AS avg_ship_days_var
+    ROUND(AVG(est_ship_days) - AVG(actual_ship_days), 2) AS avg_ship_days_var
 FROM orders
 GROUP BY customer_region
 ORDER BY avg_ship_days_var DESC
@@ -240,7 +241,7 @@ SELECT
 	customer_state,
     ROUND(AVG(est_ship_days), 2) AS sch_days,
     ROUND(AVG(actual_ship_days), 2) AS act_days,
-    AVG(est_ship_days)-AVG(actual_ship_days) AS avg_ship_days_var
+    AVG(est_ship_days) - AVG(actual_ship_days) AS avg_ship_days_var
 FROM orders
 GROUP BY customer_state
 ORDER BY avg_ship_days_var ASC
@@ -252,7 +253,7 @@ SELECT
 	customer_state,
     ROUND(AVG(est_ship_days), 2) AS sch_days,
     ROUND(AVG(actual_ship_days), 2) AS act_days,
-    AVG(est_ship_days)-AVG(actual_ship_days) AS avg_ship_days_var
+    AVG(est_ship_days) - AVG(actual_ship_days) AS avg_ship_days_var
 FROM orders
 GROUP BY customer_state
 ORDER BY avg_ship_days_var DESC
